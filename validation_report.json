@@ -1,0 +1,91 @@
+{
+  "call_id": "FORMAT_CALL_001",
+  "timestamp": "2026-03-24T07:02:54.076097",
+  "overall_score": 53.857142857142854,
+  "is_valid": false,
+  "issues": [
+    {
+      "category": "question_coverage",
+      "severity": "high",
+      "issue_type": "missing_questions",
+      "description": "Missing 10 required questions",
+      "location": "questionnaire",
+      "details": {
+        "missing_question_ids": [
+          4,
+          5,
+          6,
+          7,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ]
+      },
+      "recommendation": "Ask about: Q4, Q5, Q6, Q7, Q9, Q10, Q11, Q12, Q13, Q14"
+    },
+    {
+      "category": "answer_validity",
+      "severity": "medium",
+      "issue_type": "invalid_format",
+      "description": "BP format invalid",
+      "location": "what is your blood pressure?",
+      "details": {
+        "answer": "It's good"
+      },
+      "recommendation": "Re-ask question or verify format"
+    },
+    {
+      "category": "answer_validity",
+      "severity": "medium",
+      "issue_type": "invalid_format",
+      "description": "Expected yes/no response",
+      "location": "do you have side effects?",
+      "details": {
+        "answer": "Sometimes"
+      },
+      "recommendation": "Re-ask question or verify format"
+    },
+    {
+      "category": "call_metrics",
+      "severity": "high",
+      "issue_type": "low_completeness",
+      "description": "Only 29% of questions answered",
+      "location": null,
+      "details": null,
+      "recommendation": "Ensure all required questions are asked"
+    },
+    {
+      "category": "data_quality",
+      "severity": "medium",
+      "issue_type": "unclear_answer",
+      "description": "Unclear answer: I think maybe around 180 something...",
+      "location": null,
+      "details": null,
+      "recommendation": "Ask follow-up for clarification"
+    }
+  ],
+  "metrics": {
+    "questions_attempted": 0,
+    "questions_answered": 4,
+    "questions_valid": 2,
+    "total_questions": 14,
+    "call_duration_seconds": 90,
+    "completeness_score": 0.2857142857142857,
+    "quality_score": 53.857142857142854,
+    "agent_medical_advice_count": 0,
+    "unclear_answers_count": 1,
+    "validation_errors": [
+      "BP format invalid",
+      "Expected yes/no response"
+    ]
+  },
+  "recommendations": [
+    "Complete all 14 required health questions",
+    "Verify answer formats (weights should be numbers, BP in format 120/80)"
+  ],
+  "ticket_needed": true,
+  "ticket_category": "multiple_high_severity_issues"
+}

@@ -1,0 +1,9 @@
+openai
+sounddevice
+soundfile
+numpy
+python-dotenv
+streamlit
+pygame
+pandas
+plotly
