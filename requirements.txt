@@ -1,9 +1,10 @@
 openai
+streamlit
+pandas
 sounddevice
 soundfile
 numpy
 python-dotenv
-streamlit
 pygame
-pandas
+fpdf2
 plotly
