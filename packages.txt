@@ -1,0 +1,4 @@
+libportaudio2
+libsndfile1
+libsdl2-2.0-0
+python3-dev
