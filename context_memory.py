@@ -332,7 +332,7 @@ class ContextMemory:
             self.topic_switches.append(topic_switch)
             
             # If patient switched topic, store off-topic content
-            if new_message.role == "patient" and new_message.topic != self.current_topic:
+            if new_message.role == "patient" and new_message.topic and new_message.topic != self.current_topic:
                 self.off_topic_queue.append({
                     "topic": new_message.topic.value,
                     "content": new_message.content,
@@ -353,10 +353,12 @@ class ContextMemory:
             for pattern in name_patterns:
                 if pattern in content:
                     name_start = content.find(pattern) + len(pattern)
-                    name = content[name_start:].strip().split()[0]
-                    if name and len(name) > 1:
-                        self.patient_profile.name = name.title()
-                        break
+                    name_parts = content[name_start:].strip().split()
+                    if name_parts:
+                        name = name_parts[0]
+                        if name and len(name) > 1:
+                            self.patient_profile.name = name.title()
+                            break
         
         # Extract weight
         if "weight" in entities and "weight" in entities["weight"]:
