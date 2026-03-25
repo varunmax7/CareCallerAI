@@ -231,6 +231,12 @@ with col2:
             st.session_state.conversation = [{"role": "agent", "content": greeting}]
             if getattr(tts, 'has_audio_hardware', False):
                 tts.speak(greeting, voice=voice_map[voice_option], speed=speed, wait=False)
+            
+            # Browser-side audio playback for cloud
+            audio_bytes = tts.text_to_speech(greeting)
+            if audio_bytes:
+                st.audio(audio_bytes, format="audio/mpeg", autoplay=True)
+                
             st.rerun()
     else:
         if st.button("🔴 End Call", type="primary", use_container_width=True):
@@ -305,8 +311,15 @@ with col_left:
                 st.session_state.conversation.append({"role": "agent", "content": agent_msg})
                 if response_data.get("action") == "end_call":
                     st.session_state.call_active = False
+                
                 if getattr(tts, 'has_audio_hardware', False):
                     tts.speak(agent_msg, voice=voice_map[voice_option], speed=speed, wait=False)
+                
+                # Browser-side audio playback for cloud
+                audio_bytes = tts.text_to_speech(agent_msg)
+                if audio_bytes:
+                    st.audio(audio_bytes, format="audio/mpeg", autoplay=True)
+                    
                 st.session_state.manual_input = False
                 st.rerun()
 
