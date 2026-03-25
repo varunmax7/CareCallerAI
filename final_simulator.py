@@ -229,7 +229,8 @@ with col2:
             response = agent.process_user_input("")
             greeting = response["agent_message"]
             st.session_state.conversation = [{"role": "agent", "content": greeting}]
-            tts.speak(greeting, voice=voice_map[voice_option], speed=speed, wait=False)
+            if getattr(tts, 'has_audio_hardware', False):
+                tts.speak(greeting, voice=voice_map[voice_option], speed=speed, wait=False)
             st.rerun()
     else:
         if st.button("🔴 End Call", type="primary", use_container_width=True):
@@ -258,10 +259,13 @@ with col_left:
         col_ctrl1, col_ctrl2 = st.columns([4, 1])
         
         with col_ctrl1:
+            can_record = getattr(stt, 'has_hardware', False)
             if not st.session_state.is_recording:
-                if st.button("🎙️ Click to Speak", use_container_width=True):
+                if st.button("🎙️ Click to Speak", use_container_width=True, disabled=not can_record):
                     st.session_state.is_recording = True
                     st.rerun()
+                if not can_record:
+                    st.caption("⚠️ Microphone unavailable on cloud server. Use ⌨️ Keyboard mode below.")
             else:
                 st.warning("🎤 Recording... Speak now.")
                 audio_file = stt.record_audio(duration=3)  # Record for 3 seconds
@@ -301,7 +305,8 @@ with col_left:
                 st.session_state.conversation.append({"role": "agent", "content": agent_msg})
                 if response_data.get("action") == "end_call":
                     st.session_state.call_active = False
-                tts.speak(agent_msg, voice=voice_map[voice_option], speed=speed, wait=False)
+                if getattr(tts, 'has_audio_hardware', False):
+                    tts.speak(agent_msg, voice=voice_map[voice_option], speed=speed, wait=False)
                 st.session_state.manual_input = False
                 st.rerun()
 

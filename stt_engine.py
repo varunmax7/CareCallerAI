@@ -16,6 +16,14 @@ class STTEngine:
         self.is_recording = False
         self.audio_data = []
         
+        # Check for sound hardware
+        try:
+            sd.query_devices()
+            self.has_hardware = True
+        except Exception as e:
+            print(f"⚠️ No sound hardware detected for STT: {e}")
+            self.has_hardware = False
+        
     def start_recording(self):
         """Start recording from microphone"""
         self.is_recording = True

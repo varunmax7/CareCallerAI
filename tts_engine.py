@@ -23,7 +23,12 @@ class TTSEngine:
         self.cache_index = self.load_cache_index()
         
         # Audio playback
-        pygame.mixer.init(frequency=24000)
+        try:
+            pygame.mixer.init(frequency=24000)
+            self.has_audio_hardware = True
+        except Exception as e:
+            print(f"⚠️ Audio hardware not detected (Headless Server): {e}")
+            self.has_audio_hardware = False
         
         # Current playback state
         self.is_playing = False
