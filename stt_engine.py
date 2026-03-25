@@ -1,7 +1,15 @@
 # stt_engine.py
 from openai import OpenAI
-import sounddevice as sd
-import soundfile as sf
+try:
+    import sounddevice as sd
+except ImportError:
+    sd = None
+
+try:
+    import soundfile as sf
+except ImportError:
+    sf = None
+
 import numpy as np
 import tempfile
 import os
@@ -16,7 +24,12 @@ class STTEngine:
         self.is_recording = False
         self.audio_data = []
         
-        # Check for sound hardware
+        # Check for sound hardware and library availability
+        if sd is None:
+            print("⚠️ sounddevice library not installed. STT disabled.")
+            self.has_hardware = False
+            return
+
         try:
             sd.query_devices()
             self.has_hardware = True
@@ -35,6 +48,10 @@ class STTEngine:
             if self.is_recording:
                 self.audio_data.append(indata.copy())
         
+        if sd is None or not self.has_hardware:
+            print("❌ Cannot start recording: No audio hardware/library")
+            return
+
         # Start recording stream
         self.stream = sd.InputStream(
             samplerate=self.sample_rate,
@@ -60,7 +77,11 @@ class STTEngine:
         
         # Save to temporary file
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.wav')
-        sf.write(temp_file.name, audio_array, self.sample_rate)
+        if sf:
+            sf.write(temp_file.name, audio_array, self.sample_rate)
+        else:
+            print("❌ Cannot save audio: soundfile library not available")
+            return None
         
         # Transcribe using Whisper API
         print("📝 Transcribing...")
@@ -85,6 +106,10 @@ class STTEngine:
         """Simple one-shot recording and transcription"""
         print("🎤 Recording... Speak now!")
         
+        if sd is None or not self.has_hardware:
+            print("❌ Cannot record: No audio hardware/library")
+            return None
+
         if duration:
             # Record for fixed duration
             audio = sd.rec(
@@ -124,6 +149,10 @@ class STTEngine:
             return None
     def record_audio(self, duration=5):
         """Record audio and return the path to the temporary file"""
+        if sd is None or not self.has_hardware:
+            print("❌ Cannot record: No audio hardware/library")
+            return None
+
         print(f"🎤 Recording for {duration} seconds...")
         audio = sd.rec(
             int(duration * self.sample_rate),
@@ -134,7 +163,8 @@ class STTEngine:
         sd.wait()
         
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.wav')
-        sf.write(temp_file.name, audio, self.sample_rate)
+        if sf:
+            sf.write(temp_file.name, audio, self.sample_rate)
         return temp_file.name
 
     def transcribe(self, audio_file_path):

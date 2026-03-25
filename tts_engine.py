@@ -1,6 +1,10 @@
 # tts_engine.py
 from openai import OpenAI
-import pygame
+try:
+    import pygame
+except ImportError:
+    pygame = None
+
 import io
 import tempfile
 import os
@@ -23,12 +27,16 @@ class TTSEngine:
         self.cache_index = self.load_cache_index()
         
         # Audio playback
-        try:
-            pygame.mixer.init(frequency=24000)
-            self.has_audio_hardware = True
-        except Exception as e:
-            print(f"⚠️ Audio hardware not detected (Headless Server): {e}")
+        if pygame is None:
+            print("⚠️ pygame library not installed. TTS playback disabled.")
             self.has_audio_hardware = False
+        else:
+            try:
+                pygame.mixer.init(frequency=24000)
+                self.has_audio_hardware = True
+            except Exception as e:
+                print(f"⚠️ Audio hardware not detected (Headless Server): {e}")
+                self.has_audio_hardware = False
         
         # Current playback state
         self.is_playing = False
@@ -159,6 +167,9 @@ class TTSEngine:
             tmp_file.write(audio_data)
             tmp_path = tmp_file.name
         
+        if pygame is None or not self.has_audio_hardware:
+            return
+            
         try:
             # Load and play
             pygame.mixer.music.load(tmp_path)
@@ -189,7 +200,8 @@ class TTSEngine:
     def stop_playback(self):
         """Stop current playback"""
         self.stop_requested = True
-        pygame.mixer.music.stop()
+        if pygame and self.has_audio_hardware:
+            pygame.mixer.music.stop()
         self.is_playing = False
     
     def speak(self, text: str, voice: str = None, speed: float = None, wait: bool = True, interrupt: bool = True):
