@@ -228,12 +228,11 @@ with col2:
             agent.reset(sim_patient_name)
             response = agent.process_user_input("")
             greeting = response["agent_message"]
+            # 1. Generate response and update conversation history
             st.session_state.conversation = [{"role": "agent", "content": greeting}]
-            if getattr(tts, 'has_audio_hardware', False):
-                tts.speak(greeting, voice=voice_map[voice_option], speed=speed, wait=False)
+            audio_bytes = tts.speak(greeting, voice=voice_map[voice_option], speed=speed, wait=False)
             
-            # Browser-side audio playback for cloud
-            audio_bytes = tts.text_to_speech(greeting)
+            # 2. Browser-side audio playback for cloud/remote users
             if audio_bytes:
                 st.audio(audio_bytes, format="audio/mpeg", autoplay=True)
                 
@@ -274,7 +273,8 @@ with col_left:
                     st.caption("⚠️ Microphone unavailable on cloud server. Use ⌨️ Keyboard mode below.")
             else:
                 st.warning("🎤 Recording... Speak now.")
-                audio_file = stt.record_audio(duration=3)  # Record for 3 seconds
+                # Reduced duration from 3s to 2.5s for faster response
+                audio_file = stt.record_audio(duration=2.5)  
                 st.session_state.is_recording = False
                 
                 if audio_file:
@@ -293,8 +293,12 @@ with col_left:
                                 if response_data.get("action") == "end_call" or response_data.get("action") == "escalate_immediate":
                                     st.session_state.call_active = False
                                 
-                                # Speak response
-                                tts.speak(agent_msg, voice=voice_map[voice_option], speed=speed, wait=False)
+                                # Speak response (uses cached/returned bytes to avoid double API call)
+                                audio_bytes = tts.speak(agent_msg, voice=voice_map[voice_option], speed=speed, wait=False)
+                                
+                                # Browser-side audio playback
+                                if audio_bytes:
+                                    st.audio(audio_bytes, format="audio/mpeg", autoplay=True)
                             
                             st.rerun()
         
@@ -312,11 +316,9 @@ with col_left:
                 if response_data.get("action") == "end_call":
                     st.session_state.call_active = False
                 
-                if getattr(tts, 'has_audio_hardware', False):
-                    tts.speak(agent_msg, voice=voice_map[voice_option], speed=speed, wait=False)
+                # Combined Speak & Browser playback (optimizes latency)
+                audio_bytes = tts.speak(agent_msg, voice=voice_map[voice_option], speed=speed, wait=False)
                 
-                # Browser-side audio playback for cloud
-                audio_bytes = tts.text_to_speech(agent_msg)
                 if audio_bytes:
                     st.audio(audio_bytes, format="audio/mpeg", autoplay=True)
                     

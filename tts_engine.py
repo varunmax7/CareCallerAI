@@ -204,8 +204,8 @@ class TTSEngine:
             pygame.mixer.music.stop()
         self.is_playing = False
     
-    def speak(self, text: str, voice: str = None, speed: float = None, wait: bool = True, interrupt: bool = True):
-        """Main method to speak text"""
+    def speak(self, text: str, voice: str = None, speed: float = None, wait: bool = True, interrupt: bool = True) -> Optional[bytes]:
+        """Main method to speak text. Returns the generated/cached audio data."""
         if voice:
             self.set_voice(voice)
         if speed:
@@ -217,8 +217,8 @@ class TTSEngine:
                 self.play_audio(audio_data, interrupt)
             else:
                 self.play_async(audio_data, interrupt)
-            return True
-        return False
+            return audio_data
+        return None
     
     def set_voice(self, voice: str):
         """Change voice"""
